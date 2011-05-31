@@ -1,0 +1,9 @@
+## Interface: 40100
+## Title: MoneyMaker
+## Notes: For making gobs of money
+## Author: Mike Boers
+## Version: 0.1
+
+embeds.xml
+
+Core.lua
