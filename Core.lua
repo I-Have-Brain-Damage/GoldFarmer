@@ -108,38 +108,108 @@ function lib:DumpPricesTwo(input)
     end end
 end
 
+local ALL_BAGS = {BANK_CONTAINER, 0}
+for i = 1,NUM_BAG_SLOTS+NUM_BANKBAGSLOTS do table.insert(ALL_BAGS, i) end
 
 lib:RegisterChatCommand("bstest", "BankStackTest")
 function lib:BankStackTest(input)
     
-	if BankStack.running then
-		BankStack.announce(0, L.already_running, 1, 0, 0)
-		return
-	end
-	
-    local empty = {}
-    local items = {}
+    local bag, slot, bagslot
     
-    for i, bag, slot in BankStack.IterateBags({0, 1, 2, 3, 4}, nil, "both") do
-		--(you need withdraw *and* deposit permissions in the guild bank to move items within it)
-		local bagslot = BankStack.encode_bagslot(bag, slot)
-        local link = GetContainerItemLink(bag, slot)
-		if link then
-		    table.insert(items, bagslot)
-	    else
-	        table.insert(empty, bagslot)
-        end
-	end
-	
-	for i, source in ipairs(items) do
-	    if #empty == 0 then break end
-	    local empty_i = math.random(1, #empty)
-	    local dest = empty[empty_i]
-	    table.remove(empty, empty_i)
-	    lib:Print('move ' .. source .. ' to ' .. dest)
-	    BankStack.AddMove(source, dest)
+    if BankStack.running then
+        BankStack.announce(0, BankStack.L.already_running, 1, 0, 0)
+        return
+    end
+    BankStack.ScanBags()
+    
+    if not (BankStack.bank_open or BankStack.guild_bank_open) then
+        lib:Print('must be at bank or guild bank')
+        return
     end
     
-	BankStack.StartStacking()
-	
+    -- The bags to store items to sell.
+    local selling = BankStack.player_bags
+    
+    -- The bags into which we will store non-selling items.
+    local storage
+    if BankStack.bank_open then
+        storage = BankStack.bank_bags
+    else
+        storage = BankStack.guild
+    end
+    
+    -- Tables to contain the bagslots to move.
+    local empty_selling = {}
+    local empty_storage = {}
+    local selling_to_storage = {}
+    local storage_to_selling = {}
+    
+    -- Scan the selling bags.
+    for i, bag, slot in BankStack.IterateBags(selling, nil, "both") do
+        bagslot = BankStack.encode_bagslot(bag, slot)
+        local link = GetContainerItemLink(bag, slot)
+        if not link then
+            table.insert(empty_selling, bagslot)
+        else
+            local data = lib:GetAucData(link)
+            if data.state == lib.STATE_CANNOT_UNDERCUT then
+                table.insert(selling_to_storage, bagslot)
+                -- lib:Print('<<< ' .. link)
+            end
+        end
+    end
+    
+    -- Scan the storage bags.
+    for i, bag, slot in BankStack.IterateBags(storage, nil, "both") do
+        local bagslot = BankStack.encode_bagslot(bag, slot)
+        local link = GetContainerItemLink(bag, slot)
+        if not link then
+            table.insert(empty_storage, bagslot)
+        else
+            local data = lib:GetAucData(link)
+            if data.state ~= lib.STATE_CANNOT_UNDERCUT then
+                table.insert(storage_to_selling, bagslot)
+                -- lib:Print('>>> ' .. link)
+            end
+        end
+    end
+    
+    while #selling_to_storage > 0 or #storage_to_selling > 0 do
+        
+        lib:Print(#selling_to_storage .. ' ' .. #storage_to_selling)
+        
+        while #selling_to_storage > 0 and #empty_storage > 0 do
+            source = table.remove(selling_to_storage)
+            dest   = table.remove(empty_storage)
+            BankStack.AddMove(source, dest)
+            table.insert(empty_selling, source)
+        end
+        
+        while #storage_to_selling > 0 and #empty_selling > 0 do
+            source = table.remove(storage_to_selling)
+            dest   = table.remove(empty_selling)
+            BankStack.AddMove(source, dest)
+            table.insert(empty_storage, source)
+        end
+        
+    end
+    
+    BankStack.StartStacking()
+        
+            
+        
+        
+    -- return nil
+    -- 
+    -- for i, source in ipairs(items) do
+    --     if #empty == 0 then break end
+    --     local empty_i = math.random(1, #empty)
+    --     local dest = empty[empty_i]
+    --     table.remove(empty, empty_i)
+    --     lib:Print('move ' .. source .. ' to ' .. dest)
+    --     BankStack.AddMove(source, dest)
+    -- end
+    -- 
+    -- BankStack.StartStacking()
+    
 end
