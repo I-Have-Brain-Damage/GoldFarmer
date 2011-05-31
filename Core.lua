@@ -1,6 +1,7 @@
 if not AucAdvanced then return end
 local print,decode,_,_,replicate,empty,get,set,default,debugPrint,fill, _TRANS = AucAdvanced.GetModuleLocals()
 
+if not BankStack then return end
 
 MoneyMaker = LibStub("AceAddon-3.0"):NewAddon("MoneyMaker", "AceConsole-3.0")
 local lib = MoneyMaker
@@ -108,19 +109,37 @@ function lib:DumpPricesTwo(input)
 end
 
 
-
-
-lib:RegisterChatCommand("dumplink", "SlashDumpLink")
-function lib:SlashDumpLink(input)
-    for bag = 0,4 do
-        for slot = 1,GetContainerNumSlots(bag) do
-            local link = GetContainerItemLink(bag, slot)
-            if link then
-                local printable = gsub(link, "|", "||")
-                lib:Print(bag .. "," .. slot .. ": " .. printable)
-            end
-            -- local _, _, Color, Ltype, Id, Enchant, Gem1, Gem2, Gem3, Gem4, Suffix, Unique, LinkLvl, Name = string.find(link, "|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?")
-            -- lib:Print("SlashDumpLink " .. Name .. " " .. Unique)
+lib:RegisterChatCommand("bstest", "BankStackTest")
+function lib:BankStackTest(input)
+    
+	if BankStack.running then
+		BankStack.announce(0, L.already_running, 1, 0, 0)
+		return
+	end
+	
+    local empty = {}
+    local items = {}
+    
+    for i, bag, slot in BankStack.IterateBags({0, 1, 2, 3, 4}, nil, "both") do
+		--(you need withdraw *and* deposit permissions in the guild bank to move items within it)
+		local bagslot = BankStack.encode_bagslot(bag, slot)
+        local link = GetContainerItemLink(bag, slot)
+		if link then
+		    table.insert(items, bagslot)
+	    else
+	        table.insert(empty, bagslot)
         end
+	end
+	
+	for i, source in ipairs(items) do
+	    if #empty == 0 then break end
+	    local empty_i = math.random(1, #empty)
+	    local dest = empty[empty_i]
+	    table.remove(empty, empty_i)
+	    lib:Print('move ' .. source .. ' to ' .. dest)
+	    BankStack.AddMove(source, dest)
     end
+    
+	BankStack.StartStacking()
+	
 end
