@@ -320,16 +320,16 @@ function lib:AuctionSort(input)
         did_move = false
         
         while #selling_to_storage > 0 and #empty_storage > 0 do
-            source = table.remove(selling_to_storage)
-            dest   = table.remove(empty_storage)
+            source = table.remove(selling_to_storage, 1)
+            dest   = table.remove(empty_storage, 1)
             BankStack.AddMove(source, dest)
             table.insert(empty_selling, source)
             did_move = true
         end
         
         while #storage_to_selling > 0 and #empty_selling > 0 do
-            source = table.remove(storage_to_selling)
-            dest   = table.remove(empty_selling)
+            source = table.remove(storage_to_selling, 1)
+            dest   = table.remove(empty_selling, 1)
             BankStack.AddMove(source, dest)
             table.insert(empty_storage, source)
             did_move = true
