@@ -1,0 +1,6 @@
+- rename to GoldFarmer
+- list dependancies
+- comment everything
+- split into a couple files
+- basic docs
+
