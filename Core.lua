@@ -3,8 +3,8 @@ local print,decode,_,_,replicate,empty,get,set,default,debugPrint,fill, _TRANS =
 
 if not BankStack then return end
 
-MoneyMaker = LibStub("AceAddon-3.0"):NewAddon("MoneyMaker", "AceConsole-3.0")
-local lib = MoneyMaker
+GoldFarmer = LibStub("AceAddon-3.0"):NewAddon("GoldFarmer", "AceConsole-3.0")
+local lib = GoldFarmer
 
 local Appraiser = AucAdvanced.GetModule("Util", "Appraiser")
 local Suggest = AucAdvanced.GetModule("Util", "ItemSuggest")

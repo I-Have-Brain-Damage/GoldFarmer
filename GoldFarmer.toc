@@ -3,7 +3,7 @@
 ## Notes: To assist in reselling large volume of auction house items.
 ## Author: Mike Boers
 ## Version: 0.1
+## Dependencies: Auc-Advanced, BankStack
 
 embeds.xml
-
 Core.lua
