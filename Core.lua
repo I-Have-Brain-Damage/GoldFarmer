@@ -13,25 +13,12 @@ local Undercut = AucAdvanced.GetModule("Match", "Undercut")
 local SigFromLink = AucAdvanced.API.GetSigFromLink
 
 
-function lib:OnInitialize()
-    --
-end
-
-function lib:OnEnable()
-    lib:Print("loaded")
-end
-
-function lib:OnDisable()
-    --
-end
-
-
 
 local function GetItemID(link)
-	if type(link) == "number" then return link end
-	if link then
-		return tonumber(link:match("item:(%d+)"))
-	end
+    if type(link) == "number" then return link end
+    if link then
+        return tonumber(link:match("item:(%d+)"))
+    end
 end
 
 local function GetItemInfoTable(item)
