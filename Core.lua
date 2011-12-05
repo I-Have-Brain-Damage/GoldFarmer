@@ -142,9 +142,9 @@ function lib:GetAucData(link)
     
     if data.competing == 0 then
         data.state = lib.STATE_NO_COMPETITION
-    elseif data.returnstring:find("Can not match") then
+    elseif data.Result == "NoMatch" then
         data.state = lib.STATE_CANNOT_UNDERCUT
-    elseif data.returnstring:find("Lowest") then
+    elseif data.Result:find("Lowe") then -- "Lowest" or "LowerBid"
         if data.value >= market then
             data.state = lib.STATE_ABOVE_MARKET
         else
@@ -190,8 +190,9 @@ function lib:MMTest(input)
         local link = GetContainerItemLink(bag, slot)
         if link then
             local item_id = GetItemID(link)
-            local info = GetItemInfoTable(link)            
-            lib:Print(link .. ': ' .. ' ' .. info.type .. '/' .. info.subType .. ' #' .. item_id .. ' -> ' .. (GetIdealAuctionCount(link) or 'nil'))
+            local info = GetItemInfoTable(link)
+            local data = lib:GetAucData(link)
+            lib:Print(link .. ': ' .. data.Result)
         end
     end
     
